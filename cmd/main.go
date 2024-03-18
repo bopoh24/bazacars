@@ -21,7 +21,7 @@ func main() {
 		os.Exit(1)
 	}
 	// init logger
-	log := logger.New(cfg.App.LogLevel)
+	log := logger.New(cfg.Log.Level)
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()
 

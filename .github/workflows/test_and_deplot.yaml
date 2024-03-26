@@ -41,11 +41,12 @@ jobs:
           envkey_APP_NAME: "Bazacars"
           envkey_APP_VERSION: ${{ github.ref_name }}
           envkey_TARGET_SITE: ${{ secrets.TARGET_SITE }}
+          envkey_POSTGRES_HOST: postgres
           envkey_POSTGRES_DB: bazacars
           envkey_POSTGRES_PORT: 5445
           envkey_POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
           envkey_POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          envkey_HTTP_PORT: 8123
+          envkey_HTTP_PORT: 8124
 
       - name: Build application
         run: |

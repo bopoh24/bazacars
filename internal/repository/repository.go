@@ -6,7 +6,6 @@ import (
 	"github.com/bopoh24/bazacars/internal/config"
 	"github.com/bopoh24/bazacars/internal/model"
 	"github.com/bopoh24/bazacars/pkg/sql/builder"
-	_ "github.com/lib/pq"
 )
 
 type Repository struct {

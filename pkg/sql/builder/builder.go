@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	sq "github.com/Masterminds/squirrel"
+	_ "github.com/lib/pq"
 )
 
 type Postgres struct {

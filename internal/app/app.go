@@ -8,6 +8,7 @@ import (
 	"github.com/robfig/cron/v3"
 	"log/slog"
 	"os"
+	"time"
 )
 
 type App struct {
@@ -35,6 +36,7 @@ func (a *App) Run(ctx context.Context) error {
 
 	// add cron jobs here
 	_, err := c.AddFunc("0 9 * * *", func() {
+		started := time.Now()
 		a.log.Info("Parsing started")
 		if err := a.parser.LoadCarBrands(); err != nil {
 			a.log.Error("Failed to load car brands: %v", err)
@@ -45,6 +47,7 @@ func (a *App) Run(ctx context.Context) error {
 				a.log.Error("Failed to parse ads by brand %q: %v", brand, err)
 			}
 		}
+		slog.Info("Parsing finished!", "time", time.Since(started))
 	})
 	if err != nil {
 		return err

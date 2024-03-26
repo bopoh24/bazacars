@@ -11,7 +11,7 @@ help: ### this help information
 
 build: ### build app
 	@echo "Building ${APP_NAME}..."
-	@GOOS=linux GOARCH=amd64 go build -o app ./cmd/main.go
+	@CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o app ./cmd/main.go
 	@echo "Stopping services (if running...)"
 	docker compose down
 	@echo "Starting ${APP_NAME} services..."

@@ -17,8 +17,9 @@ type Token struct {
 }
 
 type App struct {
-	Name    string `env:"APP_NAME" env-default:"ailingo-backend"`
-	Version string `env:"APP_VERSION" env-default:"0.1.0"`
+	Name       string `env:"APP_NAME" env-default:"ailingo-backend"`
+	Version    string `env:"APP_VERSION" env-default:"0.1.0"`
+	TargetSite string `env:"TARGET_SITE" env-default:"https://www.some-site.com"`
 }
 
 type Log struct {
@@ -30,7 +31,7 @@ type Postgres struct {
 	Port     string `env:"POSTGRES_PORT" env-default:"5432"`
 	User     string `env:"POSTGRES_USER" env-default:"postgres"`
 	Pass     string `env:"POSTGRES_PASSWORD" env-default:"postgres"`
-	Database string `env:"POSTGRES_DB" env-default:"postgres"`
+	Database string `env:"POSTGRES_DB" env-default:"bazacars"`
 }
 
 type HTTP struct {

@@ -1,5 +1,4 @@
 APP_NAME := "BazaCars"
-include .env
 
 # HELP =================================================================================================================
 # This will output the help for each task

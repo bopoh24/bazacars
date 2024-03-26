@@ -6,6 +6,8 @@ require (
 	github.com/Masterminds/squirrel v1.5.4
 	github.com/PuerkitoBio/goquery v1.9.1
 	github.com/ilyakaznacheev/cleanenv v1.5.0
+	github.com/lib/pq v1.10.9
+	github.com/robfig/cron/v3 v3.0.1
 	github.com/stretchr/testify v1.9.0
 )
 

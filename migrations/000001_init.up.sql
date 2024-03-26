@@ -12,9 +12,13 @@ create table cars (
     color text not null,
     price integer not null,
     description text not null,
-    ad_id text not null unique,
-    address text not null default ''
+    ad_id text not null,
+    address text not null default '',
     link text not null,
     posted timestamp not null,
-
+    parsed date not null default current_date
 );
+
+
+-- unique index for ad_id and date
+create unique index cars_ad_id_parsed_idx on cars (ad_id, parsed);

@@ -1,4 +1,5 @@
 APP_NAME := "BazaCars"
+include .env
 
 # HELP =================================================================================================================
 # This will output the help for each task
@@ -11,8 +12,12 @@ help: ### this help information
 
 build: ### build app
 	@echo "Building ${APP_NAME}..."
-	CGO_ENABLED=0 go build -o app ./cmd
-	@echo "Done!"
+	@GOOS=linux GOARCH=amd64 go build -o app ./cmd/main.go
+	@echo "Stopping services (if running...)"
+	docker compose down
+	@echo "Starting ${APP_NAME} services..."
+	@docker compose up --build -d
+	@echo "Services built and started!"
 
 test: ### run tests
 	@echo "Running ${APP_NAME} tests..."

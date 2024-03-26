@@ -30,3 +30,34 @@ func TestExtractCarData(t *testing.T) {
 	assert.Equal(t, "3-Series", carData.Model)
 	assert.Equal(t, 25900, carData.Price)
 }
+
+func TestExtractCarManufactures(t *testing.T) {
+	f, err := os.Open("testing/main.sample")
+	assert.NoError(t, err)
+	result, err := extractCarManufacturers(f)
+	assert.NoError(t, err)
+	assert.Contains(t, result, "Audi")
+	assert.Contains(t, result, "BMW")
+	assert.Contains(t, result, "Mercedes-Benz")
+	assert.Contains(t, result, "Porsche")
+	assert.Contains(t, result, "Volkswagen")
+	assert.Equal(t, result["Audi"], "/car-motorbikes-boats-and-parts/cars-trucks-and-vans/audi/")
+}
+
+func TestExtractAdList(t *testing.T) {
+
+	f, err := os.Open("testing/main.sample")
+	assert.NoError(t, err)
+	result, err := extractAdList(f)
+	assert.NoError(t, err)
+	assert.Equal(t, 60, len(result))
+	assert.Equal(t, "/adv/4949445_suzuki-sx4-1-6l-2019/", result[0])
+}
+
+func TestExtractTotalPages(t *testing.T) {
+	f, err := os.Open("testing/main.sample")
+	assert.NoError(t, err)
+	result, err := extractTotalPages(f)
+	assert.NoError(t, err)
+	assert.Equal(t, 154, result)
+}

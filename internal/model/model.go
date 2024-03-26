@@ -38,4 +38,5 @@ type Car struct {
 	Link             string    `json:"link"`
 	Posted           time.Time `json:"posted"`
 	Address          string    `json:"address"`
+	Parsed           time.Time `json:"parsed"`
 }

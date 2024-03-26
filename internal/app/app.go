@@ -32,10 +32,12 @@ func New(conf *config.Config, log *slog.Logger) *App {
 func (a *App) Run(ctx context.Context) error {
 	a.log.Info("app running")
 	c := cron.New()
+
 	// add cron jobs here
-	_, err := c.AddFunc("* * * * *", func() {
+	_, err := c.AddFunc("0 12 * * *", func() {
+		a.log.Info("Parsing started")
 		if err := a.parser.LoadCarBrands(); err != nil {
-			a.log.Error("Failed to load car brands", "err", err)
+			a.log.Error("Failed to load car brands: %v", err)
 			return
 		}
 		for brand := range a.parser.CarBrands() {
@@ -48,8 +50,6 @@ func (a *App) Run(ctx context.Context) error {
 		return err
 	}
 
-	// start cron
-	c.Start()
 	return nil
 }
 

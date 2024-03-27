@@ -35,16 +35,16 @@ func (a *App) Run(ctx context.Context) error {
 	c := cron.New()
 
 	// add cron jobs here
-	_, err := c.AddFunc("30 10 * * *", func() {
+	_, err := c.AddFunc("50 10 * * *", func() {
 		started := time.Now()
 		a.log.Info("Parsing started")
 		if err := a.parser.LoadCarBrands(); err != nil {
-			a.log.Error("Failed to load car brands: %v", err)
+			a.log.Error("Failed to load car brands", "err", err)
 			return
 		}
 		for brand := range a.parser.CarBrands() {
 			if err := a.parser.ParseAdsByBrand(brand); err != nil {
-				a.log.Error("Failed to parse ads by brand %q: %v", brand, err)
+				a.log.Error("Failed to parse ads by brand", "brand", brand, "err", err)
 			}
 		}
 		slog.Info("Parsing finished!", "time", time.Since(started))

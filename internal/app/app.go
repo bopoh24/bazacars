@@ -35,7 +35,7 @@ func (a *App) Run(ctx context.Context) error {
 	c := cron.New()
 
 	// add cron jobs here
-	_, err := c.AddFunc("50 10 * * *", func() {
+	_, err := c.AddFunc("55 10 * * *", func() {
 		started := time.Now()
 		a.log.Info("Parsing started")
 		if err := a.parser.LoadCarBrands(); err != nil {

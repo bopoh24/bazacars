@@ -39,6 +39,7 @@ func NewCarParsingService(targetSite string, repo Repository, log *slog.Logger) 
 
 // LoadCarBrands loads car brands from the target site
 func (s *CarParsingService) LoadCarBrands() (err error) {
+	s.log.Info("Loading car brands", "url", s.targetSite+carUrl)
 	s.brands, err = parser.ParseCarBrands(s.targetSite + carUrl)
 	return err
 }

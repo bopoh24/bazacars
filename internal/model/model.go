@@ -1,6 +1,9 @@
 package model
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 type DriveType string
 
@@ -39,4 +42,25 @@ type Car struct {
 	Posted           time.Time `json:"posted"`
 	Address          string    `json:"address"`
 	Parsed           time.Time `json:"parsed"`
+}
+
+// User model with chatID
+type User struct {
+	ChatID    int64
+	FirstName string
+	LastName  string
+	Username  string
+	Admin     bool
+	Approved  bool
+	UpdatedAt time.Time
+	CreatedAt time.Time
+}
+
+func (u User) String() string {
+	result := ""
+	if u.Username != "" {
+		result += "[@" + u.Username + "] "
+	}
+	result += fmt.Sprintf("%s %s", u.FirstName, u.LastName)
+	return result
 }

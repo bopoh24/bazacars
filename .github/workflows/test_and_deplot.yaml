@@ -41,6 +41,7 @@ jobs:
           envkey_APP_NAME: "Bazacars"
           envkey_APP_VERSION: ${{ github.ref_name }}
           envkey_TARGET_SITE: ${{ secrets.TARGET_SITE }}
+          envkey_TOKEN_TELEGRAM: ${{ secrets.TOKEN_TELEGRAM }}
           envkey_POSTGRES_HOST: postgres
           envkey_POSTGRES_DB: bazacars
           envkey_POSTGRES_PORT: 5445

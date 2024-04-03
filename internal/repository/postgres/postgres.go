@@ -13,6 +13,21 @@ import (
 	"time"
 )
 
+var favouriteBrands = []string{
+	"BMW", "Mercedes-Benz", "Mazda", "Toyota", "Nissan",
+	"Audi", "Volkswagen", "Ford", "Honda", "Lexus",
+	"Jeep", "Volvo", "Infiniti", "Acura", "Land Rover", "Jaguar", "Mini",
+}
+
+var excludeModels = []string{"Fit", "2", "Yaris", "Aqua", "Sienta", "Polo", "CX-3"}
+
+const (
+	maxPrice      = 26000
+	minYear       = 2020
+	maxMileage    = 50000
+	minEngineSize = 1.5
+)
+
 type Repository struct {
 	psql *builder.Postgres
 }
@@ -57,7 +72,8 @@ func (r *Repository) Users(ctx context.Context) ([]model.User, error) {
 	var users []model.User
 	for rows.Next() {
 		var user model.User
-		if err = rows.Scan(&user.ChatID, &user.FirstName, &user.LastName, &user.Username, &user.Admin, &user.Approved, &user.UpdatedAt, &user.CreatedAt); err != nil {
+		if err = rows.Scan(&user.ChatID, &user.FirstName, &user.LastName, &user.Username,
+			&user.Admin, &user.Approved, &user.UpdatedAt, &user.CreatedAt); err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
 				return nil, repository.ErrNotFound
 			}
@@ -127,6 +143,98 @@ func (r *Repository) UserSave(ctx context.Context, user model.User) error {
 		}
 	}
 	return err
+}
+
+func (r *Repository) NewAds(ctx context.Context) ([]model.Car, error) {
+	q := r.psql.Builder().Select("manufacturer", "model", "year", "mileage", "engine", "fuel", "drive", "automatic",
+		"power", "color", "price", "description", "ad_id", "address", "link", "posted").Distinct().
+		From("cars").
+		Where(
+			sq.And{
+				sq.Eq{"manufacturer": favouriteBrands},
+				sq.NotEq{"model": excludeModels},
+				sq.LtOrEq{"price": maxPrice},
+				sq.LtOrEq{"mileage": maxMileage},
+				sq.GtOrEq{"year": minYear},
+				sq.GtOrEq{"engine": minEngineSize},
+				sq.Eq{"automatic": true},
+				sq.GtOrEq{"posted": time.Now().AddDate(0, 0, -2).Format("2006-01-02")},
+				sq.GtOrEq{"parsed": time.Now().AddDate(0, 0, -2).Format("2006-01-02")},
+				sq.Eq{"sent": false},
+			},
+		).OrderBy("manufacturer", "model")
+
+	rows, err := q.QueryContext(ctx)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, repository.ErrNotFound
+		}
+		return nil, err
+	}
+	defer rows.Close()
+	cars := make([]model.Car, 0)
+	for rows.Next() {
+		var car model.Car
+		if err = rows.Scan(&car.Manufacturer, &car.Model, &car.Year, &car.Mileage, &car.EngineSize, &car.Fuel,
+			&car.Drive, &car.AutomaticGearbox, &car.Power, &car.Color, &car.Price, &car.Description, &car.AdID,
+			&car.Address, &car.Link, &car.Posted); err != nil {
+			return nil, err
+		}
+		cars = append(cars, car)
+	}
+	return cars, nil
+}
+
+// AdSent marks the ad as sent
+func (r *Repository) AdSent(ctx context.Context, adId string) error {
+	q := r.psql.Builder().Update("cars").Set("sent", true).Where(sq.Eq{"ad_id": adId})
+	_, err := q.ExecContext(ctx)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return repository.ErrNotFound
+		}
+	}
+	return err
+}
+
+// AdsWithNewPrice marks the ad as sent and updates the price
+func (r *Repository) AdsWithNewPrice(ctx context.Context) ([]model.Car, error) {
+	q := r.psql.Builder().Select("lc.manufacturer, lc.model, lc.year, lc.mileage, lc.engine, lc.fuel, " +
+		"lc.drive, lc.automatic, lc.power, lc.color, lc.price, rc.price as old_price, " +
+		"lc.description, lc.ad_id, lc.address, lc.link, lc.posted").
+		From("cars as lc").
+		Join("cars as rc ON lc.ad_id = rc.ad_id").
+		Where(sq.And{
+			sq.NotEq{"lc.price": "rc.price"},
+			sq.Eq{"lc.manufacturer": favouriteBrands},
+			sq.NotEq{"lc.model": excludeModels},
+			sq.LtOrEq{"lc.price": maxPrice},
+			sq.LtOrEq{"lc.milage": maxMileage},
+			sq.GtOrEq{"lc.year": minYear},
+			sq.Eq{"lc.automatic": true},
+			sq.GtOrEq{"lc.engine": minEngineSize},
+			sq.Eq{"lc.parsed": time.Now().Format("2006-01-02")},
+			sq.Eq{"rc.parsed": time.Now().AddDate(0, 0, -1).Format("2006-01-02")},
+		})
+	rows, err := q.QueryContext(ctx)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, repository.ErrNotFound
+		}
+		return nil, err
+	}
+	defer rows.Close()
+	cars := make([]model.Car, 0)
+	for rows.Next() {
+		var car model.Car
+		if err = rows.Scan(&car.Manufacturer, &car.Model, &car.Year, &car.Mileage, &car.EngineSize, &car.Fuel,
+			&car.Drive, &car.AutomaticGearbox, &car.Power, &car.Color, &car.Price, &car.OldPrice, &car.Description, &car.AdID,
+			&car.Address, &car.Link, &car.Posted); err != nil {
+			return nil, err
+		}
+		cars = append(cars, car)
+	}
+	return cars, nil
 }
 
 // Close closes the repository

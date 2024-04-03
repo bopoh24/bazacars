@@ -46,7 +46,7 @@ func (a *App) Run(ctx context.Context) error {
 	go a.bot.Run(ctx)
 
 	// add cron jobs here
-	_, err := c.AddFunc("0 11 * * *", func() {
+	_, err := c.AddFunc("0 15 * * *", func() {
 		started := time.Now()
 		a.log.Info("Parsing started")
 		if err := a.parser.LoadCarBrands(); err != nil {
@@ -59,6 +59,26 @@ func (a *App) Run(ctx context.Context) error {
 			}
 		}
 		slog.Info("Parsing finished!", "time", time.Since(started))
+		ads, err := a.parser.NewAds(ctx)
+		if err != nil {
+			a.log.Error("Failed to get new ads", "err", err)
+			return
+		}
+		if len(ads) == 0 {
+			a.log.Info("No new ads")
+			return
+		}
+
+		for _, ad := range ads {
+			err = a.bot.SendMessageToSubscribers(ctx, ad.String())
+			if err != nil {
+				a.log.Error("Failed to send ad", "err", err)
+			}
+			err = a.parser.AdSent(ctx, ad.AdID)
+			if err != nil {
+				a.log.Error("Failed to mark ad as sent", "err", err)
+			}
+		}
 	})
 	if err != nil {
 		return err

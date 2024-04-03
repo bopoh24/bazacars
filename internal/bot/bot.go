@@ -106,10 +106,24 @@ func (b *Bot) Run(ctx context.Context) {
 	}
 }
 
+// SendMessageToSubscribers sends message to all approved users
+func (b *Bot) SendMessageToSubscribers(ctx context.Context, text string) error {
+	users, err := b.repo.Users(ctx)
+	if err != nil {
+		return fmt.Errorf("error getting users: %w", err)
+	}
+	for _, user := range users {
+		if user.Approved {
+			b.SendMessage(ctx, user.ChatID, text, nil)
+		}
+	}
+	return nil
+}
+
 // SendMessage sends message to chat
 func (b *Bot) SendMessage(_ context.Context, chatID int64, text string, keyboard *tgbotapi.InlineKeyboardMarkup) {
 	msgConf := tgbotapi.NewMessage(chatID, text)
-	msgConf.ParseMode = "markdown"
+	msgConf.ParseMode = tgbotapi.ModeHTML
 	if keyboard != nil {
 		msgConf.ReplyMarkup = keyboard
 	}

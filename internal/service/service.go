@@ -108,6 +108,16 @@ func (s *CarParsingService) ParseAdsByBrand(ctx context.Context, brand string) e
 	return nil
 }
 
+// NewAds returns new ads
+func (s *CarParsingService) NewAds(ctx context.Context) ([]model.Car, error) {
+	return s.repo.NewAds(ctx)
+}
+
+// AdSent marks the ad as sent
+func (s *CarParsingService) AdSent(ctx context.Context, adId string) error {
+	return s.repo.AdSent(ctx, adId)
+}
+
 // Close closes the car parsing service
 func (s *CarParsingService) Close(ctx context.Context) {
 	s.log.Info("closing car parsing service")

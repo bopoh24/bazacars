@@ -46,7 +46,7 @@ func (a *App) Run(ctx context.Context) error {
 	go a.bot.Run(ctx)
 
 	// add cron jobs here
-	_, err := c.AddFunc("0 15 * * *", func() {
+	_, err := c.AddFunc("5 12 * * *", func() {
 		started := time.Now()
 		a.log.Info("Parsing started")
 		if err := a.parser.LoadCarBrands(); err != nil {

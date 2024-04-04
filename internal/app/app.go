@@ -2,14 +2,29 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"github.com/bopoh24/bazacars/internal/bot"
 	"github.com/bopoh24/bazacars/internal/config"
+	"github.com/bopoh24/bazacars/internal/model"
 	"github.com/bopoh24/bazacars/internal/repository/postgres"
 	"github.com/bopoh24/bazacars/internal/service"
 	"github.com/robfig/cron/v3"
 	"log/slog"
 	"os"
 	"time"
+)
+
+const (
+	EmojiAlert     = "🚨"
+	EmojiNew       = "🆕"
+	EmojiCar       = "🚗"
+	EmojiEuro      = "💶"
+	EmojiLocation  = "📍"
+	EmojiDate      = "📅"
+	EmojiArrow     = "➡️"
+	EmojiWarning   = "⚠️"
+	EmojiChartDown = "📉"
+	EmojiChartUp   = "📈"
 )
 
 type App struct {
@@ -58,7 +73,8 @@ func (a *App) Run(ctx context.Context) error {
 				a.log.Error("Failed to parse ads by brand", "brand", brand, "err", err)
 			}
 		}
-		slog.Info("Parsing finished!", "time", time.Since(started))
+		a.log.Info("Parsing finished!", "time", time.Since(started))
+		a.log.Info("Sending new ads to subscribers")
 		ads, err := a.parser.NewAds(ctx)
 		if err != nil {
 			a.log.Error("Failed to get new ads", "err", err)
@@ -68,9 +84,8 @@ func (a *App) Run(ctx context.Context) error {
 			a.log.Info("No new ads")
 			return
 		}
-
 		for _, ad := range ads {
-			err = a.bot.SendMessageToSubscribers(ctx, ad.String())
+			err = a.bot.SendMessageToSubscribers(ctx, newCarMessage(ad))
 			if err != nil {
 				a.log.Error("Failed to send ad", "err", err)
 			}
@@ -79,12 +94,56 @@ func (a *App) Run(ctx context.Context) error {
 				a.log.Error("Failed to mark ad as sent", "err", err)
 			}
 		}
+		a.log.Info("New ads sent")
+		a.log.Info("Sending ads with new price to subscribers")
+		cars, err := a.parser.AdsWithNewPrice(ctx)
+		if err != nil {
+			a.log.Error("Failed to get ads with new price", "err", err)
+			return
+		}
+		if len(cars) == 0 {
+			a.log.Info("No ads with new price")
+			return
+		}
+		for _, car := range cars {
+			err = a.bot.SendMessageToSubscribers(ctx, priceChangedMessage(car))
+			if err != nil {
+				a.log.Error("Failed to send ad", "err", err)
+			}
+			err = a.parser.AdSent(ctx, car.AdID)
+			if err != nil {
+				a.log.Error("Failed to mark ad as sent", "err", err)
+			}
+		}
+		a.log.Info("Ads with new price sent")
 	})
 	if err != nil {
 		return err
 	}
 	c.Start()
 	return nil
+}
+
+func newCarMessage(c model.Car) string {
+	return fmt.Sprintf("%s <strong>%s %s</strong> (%d)\n\n"+
+		"%s <strong>%d€</strong>\n\n"+
+		"%s %dkm (%s)\n\n<i>%s %s</i>\n%s\n%s",
+		EmojiNew, c.Manufacturer, c.Model, c.Year, EmojiEuro, c.Price, EmojiCar,
+		c.Mileage, c.Fuel, EmojiLocation, c.Address, c.Posted.Format("02.01.2006 15:04"), c.Link)
+}
+
+func priceChangedMessage(c model.Car) string {
+
+	arrEmoji := EmojiChartDown
+	if c.Price > c.OldPrice {
+		arrEmoji = EmojiChartUp
+	}
+	return fmt.Sprintf(
+		"%s <strong>%s %s</strong>  (%d)\n\n"+
+			"%s <s>%d€</s> %s <strong>%d€</strong>\n\n"+
+			"%s %dkm (%s)\n\n<i>%s %s</i>\n%s\n%s",
+		arrEmoji, c.Manufacturer, c.Model, c.Year, EmojiEuro, c.OldPrice, EmojiArrow, c.Price, EmojiCar,
+		c.Mileage, c.Fuel, EmojiLocation, c.Address, c.Posted.Format("02.01.2006 15:04"), c.Link)
 }
 
 // Close closes the app

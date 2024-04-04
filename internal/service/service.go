@@ -118,6 +118,11 @@ func (s *CarParsingService) AdSent(ctx context.Context, adId string) error {
 	return s.repo.AdSent(ctx, adId)
 }
 
+// AdsWithNewPrice returns ads with new price
+func (s *CarParsingService) AdsWithNewPrice(ctx context.Context) ([]model.Car, error) {
+	return s.repo.AdsWithNewPrice(ctx)
+}
+
 // Close closes the car parsing service
 func (s *CarParsingService) Close(ctx context.Context) {
 	s.log.Info("closing car parsing service")

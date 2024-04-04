@@ -19,7 +19,7 @@ var favouriteBrands = []string{
 	"Jeep", "Volvo", "Infiniti", "Acura", "Land Rover", "Jaguar", "Mini",
 }
 
-var excludeModels = []string{"Fit", "2", "Yaris", "Aqua", "Sienta", "Polo", "CX-3"}
+var excludeModels = []string{"Fit", "2", "Yaris", "Aqua", "Sienta", "Polo", "CX-3", "Voxy", "Porte"}
 
 const (
 	maxPrice      = 26000
@@ -208,11 +208,11 @@ func (r *Repository) AdsWithNewPrice(ctx context.Context) ([]model.Car, error) {
 		From("cars as lc").
 		Join("cars as rc ON lc.ad_id = rc.ad_id").
 		Where(sq.And{
-			sq.NotEq{"lc.price": "rc.price"},
+			sq.Expr("rc.price != lc.price"),
 			sq.Eq{"lc.manufacturer": favouriteBrands},
 			sq.NotEq{"lc.model": excludeModels},
 			sq.LtOrEq{"lc.price": maxPrice},
-			sq.LtOrEq{"lc.milage": maxMileage},
+			sq.LtOrEq{"lc.mileage": maxMileage},
 			sq.GtOrEq{"lc.year": minYear},
 			sq.Eq{"lc.automatic": true},
 			sq.GtOrEq{"lc.engine": minEngineSize},

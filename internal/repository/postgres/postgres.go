@@ -72,8 +72,8 @@ func (r *Repository) Users(ctx context.Context) ([]model.User, error) {
 	var users []model.User
 	for rows.Next() {
 		var user model.User
-		if err = rows.Scan(&user.ChatID, &user.FirstName, &user.LastName, &user.Username,
-			&user.Admin, &user.Approved, &user.UpdatedAt, &user.CreatedAt); err != nil {
+		if err = rows.Scan(&user.ChatID, &user.Username, &user.FirstName, &user.LastName,
+			&user.Approved, &user.Admin, &user.UpdatedAt, &user.CreatedAt); err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
 				return nil, repository.ErrNotFound
 			}
@@ -88,7 +88,8 @@ func (r *Repository) User(ctx context.Context, chatID int64) (model.User, error)
 	q := r.psql.Builder().Select("*").From("users").Where(sq.Eq{"chat_id": chatID})
 	row := q.QueryRowContext(ctx)
 	var user model.User
-	if err := row.Scan(&user.ChatID, &user.FirstName, &user.LastName, &user.Username, &user.Admin, &user.Approved, &user.UpdatedAt, &user.CreatedAt); err != nil {
+	if err := row.Scan(&user.ChatID, &user.Username, &user.FirstName, &user.LastName, &user.Approved,
+		&user.Admin, &user.UpdatedAt, &user.CreatedAt); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return model.User{}, repository.ErrNotFound
 		}
@@ -110,8 +111,8 @@ func (r *Repository) Admins(ctx context.Context) ([]model.User, error) {
 	var users []model.User
 	for rows.Next() {
 		var user model.User
-		err = rows.Scan(&user.ChatID, &user.FirstName, &user.LastName, &user.Username, &user.Admin,
-			&user.Approved, &user.UpdatedAt, &user.CreatedAt)
+		err = rows.Scan(&user.ChatID, &user.Username, &user.FirstName, &user.LastName,
+			&user.Approved, &user.Admin, &user.UpdatedAt, &user.CreatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -121,19 +122,21 @@ func (r *Repository) Admins(ctx context.Context) ([]model.User, error) {
 }
 
 func (r *Repository) UserAdd(ctx context.Context, user model.User) error {
-	q := r.psql.Builder().Insert("users").Columns("chat_id", "first_name", "last_name", "username", "admin", "approved", "updated_at", "created_at")
-	q = q.Values(user.ChatID, user.FirstName, user.LastName, user.Username, user.Admin, user.Approved, user.UpdatedAt, user.CreatedAt)
+	q := r.psql.Builder().Insert("users").Columns("chat_id", "username", "first_name", "last_name",
+		"approved", "admin", "updated_at", "created_at")
+	q = q.Values(user.ChatID, user.Username, user.FirstName, user.LastName, user.Approved, user.Admin,
+		user.UpdatedAt, user.CreatedAt)
 	_, err := q.ExecContext(ctx)
 	return err
 }
 
 func (r *Repository) UserSave(ctx context.Context, user model.User) error {
 	q := r.psql.Builder().Update("users").
+		Set("username", user.Username).
 		Set("first_name", user.FirstName).
 		Set("last_name", user.LastName).
-		Set("username", user.Username).
-		Set("admin", user.Admin).
 		Set("approved", user.Approved).
+		Set("admin", user.Admin).
 		Set("updated_at", time.Now().UTC()).
 		Where(sq.Eq{"chat_id": user.ChatID})
 	_, err := q.ExecContext(ctx)

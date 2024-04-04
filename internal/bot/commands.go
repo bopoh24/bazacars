@@ -23,7 +23,7 @@ func (b *Bot) commandUsersHandler(ctx context.Context, chatID int64) {
 		b.logger.Error("Error getting users", "err", err)
 		return
 	}
-	userList := "***Users:***\n"
+	userList := "<strong>Users:</strong>\n"
 	for _, user := range users {
 		// emoji done there
 		if user.Approved {

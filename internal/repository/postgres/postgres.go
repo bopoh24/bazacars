@@ -161,8 +161,8 @@ func (r *Repository) NewAds(ctx context.Context) ([]model.Car, error) {
 				sq.GtOrEq{"year": minYear},
 				sq.GtOrEq{"engine": minEngineSize},
 				sq.Eq{"automatic": true},
-				sq.GtOrEq{"posted": time.Now().AddDate(0, 0, -2).Format("2006-01-02")},
-				sq.GtOrEq{"parsed": time.Now().AddDate(0, 0, -2).Format("2006-01-02")},
+				sq.GtOrEq{"posted": time.Now().AddDate(0, 0, -1).Format("2006-01-02")},
+				sq.GtOrEq{"parsed": time.Now().AddDate(0, 0, -1).Format("2006-01-02")},
 				sq.Eq{"sent": false},
 			},
 		).OrderBy("manufacturer", "model")

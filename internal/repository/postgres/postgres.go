@@ -162,7 +162,7 @@ func (r *Repository) NewAds(ctx context.Context) ([]model.Car, error) {
 				sq.GtOrEq{"engine": minEngineSize},
 				sq.Eq{"automatic": true},
 				sq.GtOrEq{"posted": time.Now().AddDate(0, 0, -1).Format("2006-01-02")},
-				sq.GtOrEq{"parsed": time.Now().AddDate(0, 0, -1).Format("2006-01-02")},
+				sq.GtOrEq{"parsed": time.Now().Format("2006-01-02")},
 				sq.Eq{"sent": false},
 			},
 		).OrderBy("manufacturer", "model")
@@ -186,6 +186,20 @@ func (r *Repository) NewAds(ctx context.Context) ([]model.Car, error) {
 		cars = append(cars, car)
 	}
 	return cars, nil
+}
+
+// UpdateSent updates the sent field in the database
+func (r *Repository) UpdateSent(ctx context.Context) error {
+	q := r.psql.Builder().Update("cars").Set("sent", true).
+		Where(sq.Expr("ad_id in (?)",
+			sq.Select("ad_id").Distinct().From("cars").Where(sq.Eq{"sent": true})))
+	_, err := q.ExecContext(ctx)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return repository.ErrNotFound
+		}
+	}
+	return err
 }
 
 // AdSent marks the ad as sent

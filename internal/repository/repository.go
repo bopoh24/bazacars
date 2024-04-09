@@ -9,6 +9,7 @@ type Repository interface {
 	SaveCars(ctx context.Context, car []model.Car) error
 	NewAds(ctx context.Context) ([]model.Car, error)
 	AdSent(ctx context.Context, adId string) error
+	UpdateSent(ctx context.Context) error
 	AdsWithNewPrice(ctx context.Context) ([]model.Car, error)
 	Users(ctx context.Context) ([]model.User, error)
 	User(ctx context.Context, chatID int64) (model.User, error)

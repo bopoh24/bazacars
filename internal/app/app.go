@@ -74,6 +74,11 @@ func (a *App) Run(ctx context.Context) error {
 			}
 		}
 		a.log.Info("Parsing finished!", "time", time.Since(started))
+		// update sent ads
+		err := a.parser.UpdateSent(ctx)
+		if err != nil {
+			a.log.Error("Failed to update sent ads", "err", err)
+		}
 		a.log.Info("Sending new ads to subscribers")
 		ads, err := a.parser.NewAds(ctx)
 		if err != nil {

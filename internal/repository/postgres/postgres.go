@@ -19,10 +19,10 @@ var favouriteBrands = []string{
 	"Jeep", "Volvo", "Infiniti", "Acura", "Land Rover", "Jaguar", "Mini",
 }
 
-var excludeModels = []string{"Fit", "2", "Yaris", "Aqua", "Sienta", "Polo", "CX-3", "Voxy", "Porte"}
+var excludeModels = []string{"Fit", "2", "Yaris", "Aqua", "Sienta", "Polo", "CX-3", "Voxy", "Porte", "Yaris Cross", "C-HR", "Vezel"}
 
 const (
-	maxPrice      = 26000
+	maxPrice      = 29000
 	minYear       = 2020
 	maxMileage    = 50000
 	minEngineSize = 1.5
